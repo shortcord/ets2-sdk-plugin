@@ -33,17 +33,6 @@ const scsConfigHandler_t scsConfigTable[] = {
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_cabin_position, handleCabinPosition },
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_head_position, handleHeadPosition },
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_hook_position, handleHookPosition },
-	/*{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_wheel_position, handleWheelPosition },
-	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_wheel_count, handleWheelCount },
-	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_wheel_steerable, handleWheelSteerable },
-	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_wheel_simulated, handleWheelSimulated },
-	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_wheel_radius, handleWheelRadius },
-	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_wheel_powered, handleWheelPowered },
-	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_wheel_liftable, handleWheelLiftable },
-	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_selector_count, handleSelectorCount },
-	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_slot_gear, handleSlotGear },
-	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_slot_handle_position, handleSlotHandlePosition },
-	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_slot_selectors, handleSlotSelectors },*/
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_shifter_type, handleShifterType },
 
 	// Job information
@@ -255,59 +244,18 @@ scsConfigHandle(CabinPosition) {
 	telemPtr->tel_rev4.cabinPositionY = current->value.value_fvector.y;
 	telemPtr->tel_rev4.cabinPositionZ = current->value.value_fvector.z;
 }
+
 scsConfigHandle(HeadPosition) {
 	telemPtr->tel_rev4.headPositionX = current->value.value_fvector.x;
 	telemPtr->tel_rev4.headPositionY = current->value.value_fvector.y;
 	telemPtr->tel_rev4.headPositionZ = current->value.value_fvector.z;
 }
+
 scsConfigHandle(HookPosition) {
 	telemPtr->tel_rev4.hookPositionX = current->value.value_fvector.x;
 	telemPtr->tel_rev4.hookPositionY = current->value.value_fvector.y;
 	telemPtr->tel_rev4.hookPositionZ = current->value.value_fvector.z;
 }
-
-/*
-scsConfigHandle(WheelCount) { telemPtr->tel_rev4.wheelCount = current->value.value_u32.value; }
-scsConfigHandle(WheelPosition) {
-	if (current->index >= MAX_WHEEL_COUNT) return;
-	telemPtr->tel_rev4.wheelPositionX[current->index] = current->value.value_fvector.x;
-	telemPtr->tel_rev4.wheelPositionY[current->index] = current->value.value_fvector.y;
-	telemPtr->tel_rev4.wheelPositionZ[current->index] = current->value.value_fvector.z;
-}
-scsConfigHandle(WheelSteerable) {
-	if (current->index >= MAX_WHEEL_COUNT) return;
-	telemPtr->tel_rev4.wheelSteerable[current->index] = current->value.value_bool.value;	
-}
-scsConfigHandle(WheelSimulated) {
-	if (current->index >= MAX_WHEEL_COUNT) return;
-	telemPtr->tel_rev4.wheelSimulated[current->index] = current->value.value_bool.value;
-}
-scsConfigHandle(WheelRadius) {
-	if (current->index >= MAX_WHEEL_COUNT) return;
-	telemPtr->tel_rev4.wheelRadius[current->index] = current->value.value_float.value;
-}
-scsConfigHandle(WheelPowered) {
-	if (current->index >= MAX_WHEEL_COUNT) return;
-	telemPtr->tel_rev4.wheelPowered[current->index] = current->value.value_bool.value;
-}
-scsConfigHandle(WheelLiftable) {
-	if (current->index >= MAX_WHEEL_COUNT) return;
-	telemPtr->tel_rev4.wheelLiftable[current->index] = current->value.value_bool.value;
-}
-
-scsConfigHandle(SelectorCount) { telemPtr->tel_rev4.selectorCount = current->value.value_u32.value; }
-scsConfigHandle(SlotGear) {
-	if (current->index >= MAX_SLOT_COUNT) return;
-	telemPtr->tel_rev4.slotGear[current->index] = current->value.value_s32.value;
-}
-scsConfigHandle(SlotHandlePosition) {
-	if (current->index >= MAX_SLOT_COUNT) return;
-	telemPtr->tel_rev4.slotHandlePosition[current->index] = current->value.value_u32.value;
-}
-scsConfigHandle(SlotSelectors) {
-	if (current->index >= MAX_SLOT_COUNT) return;
-	telemPtr->tel_rev4.slotSelectors[current->index] = current->value.value_u32.value;
-}*/
 
 scsConfigHandle(ShifterType) {	
 	strncpy(telemPtr->tel_rev4.shifterType, current->value.value_string.value, MAX_SHIFTER_TYPE_STRING_SIZE);

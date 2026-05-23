@@ -71,19 +71,19 @@ typedef struct ets2TelemetryMap_s
 
 		// vehicle dynamics
 		float speed;
-		
+
 		float accelerationX;
 		float accelerationY;
 		float accelerationZ;
-	
+
 		float coordinateX;
 		float coordinateY;
 		float coordinateZ;
-	
+
 		float rotationX;
 		float rotationY;
 		float rotationZ;
-	
+
 		// drivetrain essentials
 		int gear;
 		int gears;
@@ -92,27 +92,27 @@ typedef struct ets2TelemetryMap_s
 
 		float engineRpm;
 		float engineRpmMax;
-		
+
 		float fuel;
 		float fuelCapacity;
 		float fuelRate;				// ! Not working
 		float fuelAvgConsumption;
-		
+
 		// user input
 		float userSteer;
 		float userThrottle;
 		float userBrake;
 		float userClutch;
-		
+
 		float gameSteer;
 		float gameThrottle;
 		float gameBrake;
 		float gameClutch;
-	
+
 		// truck & trailer
 		float truckWeight;		//TODO:fix
 		float trailerWeight;
-		
+
 		int modelType[2];
 		int trailerType[2];			// ! deprecated
 
@@ -127,7 +127,7 @@ typedef struct ets2TelemetryMap_s
 		float trailerMass;
 		char trailerId[GENERAL_STRING_SIZE];
 		char trailerName[GENERAL_STRING_SIZE];
-		
+
 		// Job information
 		int jobIncome;
 		int time_abs_delivery;
@@ -198,8 +198,6 @@ typedef struct ets2TelemetryMap_s
 		char truckMake[GENERAL_STRING_SIZE];
 		char truckMakeId[GENERAL_STRING_SIZE];
 		char truckModel[GENERAL_STRING_SIZE];
-
-
 	} tel_rev3;
 
 #define MAX_SHIFTER_TYPE_STRING_SIZE 16
@@ -217,7 +215,7 @@ typedef struct ets2TelemetryMap_s
 		float batteryVoltageWarningValue;
 
 		unsigned int retarderStepCount;
-		
+
 		float cabinPositionX;
 		float cabinPositionY;
 		float cabinPositionZ;
@@ -227,7 +225,7 @@ typedef struct ets2TelemetryMap_s
 		float hookPositionX;
 		float hookPositionY;
 		float hookPositionZ;
-		
+
 		char shifterType[MAX_SHIFTER_TYPE_STRING_SIZE]; // "arcade", "automatic", "manual", "hshifter"
 
 		float localScale; // time scale
@@ -238,36 +236,11 @@ typedef struct ets2TelemetryMap_s
 		float trailerRotationX;
 		float trailerRotationY;
 		float trailerRotationZ;
-		
+
 		int displayedGear;
 		float navigationDistance;
 		float navigationTime;
 		float navigationSpeedLimit;
-
-		/*
-		unsigned char truckWheelCount;
-		unsigned char trailerWheelCount;
-
-		unsigned int wheelCount;
-		float wheelPositionX[MAX_WHEEL_COUNT];
-		float wheelPositionY[MAX_WHEEL_COUNT];
-		float wheelPositionZ[MAX_WHEEL_COUNT];
-		bool wheelSteerable[MAX_WHEEL_COUNT];
-		bool wheelSimulated[MAX_WHEEL_COUNT];
-		float wheelRadius[MAX_WHEEL_COUNT];
-		bool wheelPowered[MAX_WHEEL_COUNT];
-		bool wheelLiftable[MAX_WHEEL_COUNT];
-
-		float wheelRotation[MAX_WHEEL_COUNT];
-		float wheelAngularVelocity[MAX_WHEEL_COUNT];
-		unsigned int wheelSubstance[MAX_WHEEL_COUNT];
-		
-		unsigned int selectorCount;
-		int slotGear[MAX_SLOT_COUNT];
-		unsigned int slotHandlePosition[MAX_SLOT_COUNT];
-		unsigned int slotSelectors[MAX_SLOT_COUNT];
-		*/
-		
 	} tel_rev4;
 
 } ets2TelemetryMap_t;

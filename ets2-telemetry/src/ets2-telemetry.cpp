@@ -51,7 +51,6 @@ scs_timestamp_t last_timestamp = static_cast<scs_timestamp_t>(-1);
 scs_timestamp_t timestamp;
 
 #ifdef SDK_ENABLE_LOGGING
-
 FILE *log_file = NULL;
 #endif
 
@@ -156,25 +155,6 @@ SCSAPI_VOID telemetry_configuration(const scs_event_t event, const void *const e
 	fprintf(log_file,"----\n");
 #endif
 
-	/*
-	if (event == SCS_TELEMETRY_EVENT_configuration) {
-		fprintf(log_file, "configuration: %s", info->id);
-		if (strncmp(SCS_TELEMETRY_CONFIG_truck, info->id, sizeof(SCS_TELEMETRY_CONFIG_truck)) == 0) 
-		{
-			if (info->attributes->name != NULL && strcmp(SCS_TELEMETRY_CONFIG_ATTRIBUTE_wheel_count, info->attributes->name) == 0) {
-				telemPtr->tel_rev4.truckWheelCount = (unsigned char)(info->attributes->value.value_u32.value);
-				fprintf(log_file, "truckWheelCount: %u", telemPtr->tel_rev4.truckWheelCount);
-			}
-		}
-		else if (strncmp(SCS_TELEMETRY_CONFIG_trailer, info->id, sizeof(SCS_TELEMETRY_CONFIG_trailer)) == 0)
-		{
-			if (info->attributes->name != NULL && strcmp(SCS_TELEMETRY_CONFIG_ATTRIBUTE_wheel_count, info->attributes->name) == 0) {
-				telemPtr->tel_rev4.trailerWheelCount = (unsigned char)(info->attributes->value.value_u32.value);
-				fprintf(log_file, "trailerWheelCount: %u", telemPtr->tel_rev4.trailerWheelCount);
-			}			
-		}
-	}*/
-
     for (const scs_named_value_t *current = info->attributes; current->name; ++current)
 	{
 #ifdef SDK_ENABLE_LOGGING
@@ -204,27 +184,6 @@ SCSAPI_VOID telemetry_configuration(const scs_event_t event, const void *const e
 			case SCS_VALUE_TYPE_double:
 				fprintf(log_file, "%f (double[%i])", current->value.value_double.value, current->index);
 				break;
-
-				/*
-			case SCS_VALUE_TYPE_fvector:
-				fprintf(log_file, "%s (string)", current->value.value_string.value);
-				break;
-
-			case SCS_VALUE_TYPE_dvector:
-				fprintf(log_file, "%s (string)", current->value.value_string.value);
-				break;
-
-			case SCS_VALUE_TYPE_euler:
-				fprintf(log_file, "%s (string)", current->value.value_string.value);
-				break;
-
-			case SCS_VALUE_TYPE_fplacement:
-				fprintf(log_file, "%s (string)", current->value.value_string.value);
-				break;
-
-			case SCS_VALUE_TYPE_dplacement:
-				fprintf(log_file, "%s (string)", current->value.value_string.value);
-				break;*/
 
 			case SCS_VALUE_TYPE_string:
 				fprintf(log_file, "%s (string)", current->value.value_string.value);
@@ -350,6 +309,7 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
 #ifdef SDK_ENABLE_LOGGING
     log_file = fopen("telemetry.log", "wt");
 #endif
+
 	telemPtr = (ets2TelemetryMap_t*) (telemMem->GetBuffer());
 	memset(telemPtr, 0, ETS2_PLUGIN_MMF_SIZE);
 
@@ -466,12 +426,6 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
 	registerChannel(TRUCK_CHANNEL_navigation_distance, float, telemPtr->tel_rev4.navigationDistance);
 	registerChannel(TRUCK_CHANNEL_navigation_time, float, telemPtr->tel_rev4.navigationTime);
 	registerChannel(TRUCK_CHANNEL_navigation_speed_limit, float, telemPtr->tel_rev4.navigationSpeedLimit);
-	
-	/*
-	registerChannel_index(TRUCK_CHANNEL_wheel_rotation, float, telemPtr->tel_rev4.wheelRotation, 0);
-	registerChannel_index(TRUCK_CHANNEL_wheel_velocity, float, telemPtr->tel_rev4.wheelAngularVelocity, 0);
-	int r = registerChannel_index(TRUCK_CHANNEL_wheel_substance, u32, telemPtr->tel_rev4.wheelSubstance, 0);
-	fprintf(log_file, "return: %i\n", r);*/
 	
 	// Set the structure with defaults.
 

@@ -124,27 +124,26 @@ SharedMemory::SharedMemory(SharedMemoryName namePtr, unsigned int size)
 void SharedMemory::Close(void)
 {
 #ifdef SHAREDMEM_LOGGING
-		if (logFilePtr != NULL)
-		{
-			fclose(logFilePtr);
-			logFilePtr = NULL;
-		}
+    if (logFilePtr != NULL)
+    {
+        fclose(logFilePtr);
+        logFilePtr = NULL;
+    }
 #endif
-        if (isSharedMemoryHooked)
-        {
+    if (isSharedMemoryHooked)
+    {
 #ifdef _WIN32
-                if (pBufferPtr != NULL) UnmapViewOfFile(pBufferPtr);
-                if (hMapFile != NULL) CloseHandle(hMapFile);
-                hMapFile = NULL;
+            if (pBufferPtr != NULL) UnmapViewOfFile(pBufferPtr);
+            if (hMapFile != NULL) CloseHandle(hMapFile);
+            hMapFile = NULL;
 #else
-                if (pBufferPtr != NULL) munmap(pBufferPtr, mapsize);
-                if (hMapFile != -1) close(hMapFile);
-                if (namePtr != NULL) shm_unlink(namePtr);
-                hMapFile = -1;
+            if (pBufferPtr != NULL) munmap(pBufferPtr, mapsize);
+            if (hMapFile != -1) close(hMapFile);
+            if (namePtr != NULL) shm_unlink(namePtr);
+            hMapFile = -1;
 #endif
-        }
+    }
 
-        pBufferPtr = NULL;
-        isSharedMemoryHooked = false;
-
+    pBufferPtr = NULL;
+    isSharedMemoryHooked = false;
 }

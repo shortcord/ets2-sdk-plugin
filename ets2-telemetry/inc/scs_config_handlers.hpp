@@ -40,17 +40,6 @@ scsConfigHandle(RetarderStepCount);
 scsConfigHandle(CabinPosition);
 scsConfigHandle(HeadPosition);
 scsConfigHandle(HookPosition);
-/*scsConfigHandle(WheelCount);
-scsConfigHandle(WheelRadius);
-scsConfigHandle(WheelPosition);
-scsConfigHandle(WheelSteerable);
-scsConfigHandle(WheelSimulated);
-scsConfigHandle(WheelPowered);
-scsConfigHandle(WheelLiftable);*/
-/*scsConfigHandle(SelectorCount);
-scsConfigHandle(SlotGear);
-scsConfigHandle(SlotHandlePosition);
-scsConfigHandle(SlotSelectors);*/
 scsConfigHandle(ShifterType);
 
 // Job info
