@@ -8,7 +8,7 @@
 
 typedef struct scsConfigHandler_s
 {
-	char* id;
+	const char* id;
 	void (*handle) (const scs_named_value_t* current);
 } scsConfigHandler_t;
 

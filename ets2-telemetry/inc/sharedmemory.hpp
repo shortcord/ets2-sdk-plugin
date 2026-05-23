@@ -1,9 +1,19 @@
 #ifndef SHAREDMEMORY_HPP
 #define SHAREDMEMORY_HPP
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "ets2-telemetry-common.hpp"
+
+#ifdef _WIN32
+typedef LPCWSTR SharedMemoryName;
+#else
+typedef const char* SharedMemoryName;
+#endif
 
 #undef SHAREDMEM_LOGGING
 #if ETS2_PLUGIN_LOGGING_ON == 1
@@ -17,11 +27,15 @@ class SharedMemory
 {
 protected:
 
-        LPCWSTR namePtr;
+        SharedMemoryName namePtr;
         int mapsize;
 
 		// MMF specifics
+#ifdef _WIN32
         HANDLE hMapFile;
+#else
+        int hMapFile;
+#endif
         void* pBufferPtr;
 
 		// Status about hook
@@ -38,7 +52,7 @@ public:
         bool Hooked() { return isSharedMemoryHooked; }
         void* GetBuffer() { return pBufferPtr; }
 
-        SharedMemory(LPCWSTR mapPtr, unsigned int size);
+        SharedMemory(SharedMemoryName mapPtr, unsigned int size);
         void Close();
 
 		void* getPtrAt(int offset) { return (void*) &(((unsigned char*)pBufferPtr)[offset]); }

@@ -11,13 +11,21 @@
 
 #define ETS2_PLUGIN_LOGGING_ON				_DEBUG
 #define ETS2_PLUGIN_LOGGING_SHAREDMEMORY	1
-#define ETS2_PLUGIN_FILENAME_PREFIX "C:\ets2telem_"
+#ifdef _WIN32
+#define ETS2_PLUGIN_FILENAME_PREFIX "C:\\ets2telem_"
+#else
+#define ETS2_PLUGIN_FILENAME_PREFIX "/tmp/ets2telem_"
+#endif
 
 #if ETS2_PLUGIN_LOGGING_ON == 1
 #define SDK_ENABLE_LOGGING
 #endif
 
+#ifdef _WIN32
 #define ETS2_PLUGIN_MMF_NAME TEXT("Local\\Ets2TelemetryServer")
+#else
+#define ETS2_PLUGIN_MMF_NAME "/Ets2TelemetryServer"
+#endif
 #define ETS2_PLUGIN_MMF_SIZE (16*1024)
 
 #define TRUCK_STRING_OFFSET 15*1024

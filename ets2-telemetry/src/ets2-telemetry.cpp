@@ -4,15 +4,17 @@
  * Writes the output into file inside the current directory.
  */
 
-// Windows stuff.
-
+#ifdef _WIN32
 #define WINVER 0x0500
 #define _WIN32_WINNT 0x0500
 #include <windows.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <stdarg.h>
+#include <string.h>
 
 // SDK
 
@@ -40,7 +42,7 @@
 
 SharedMemory *telemMem;
 ets2TelemetryMap_t *telemPtr;
-LPWSTR ets2MmfName = ETS2_PLUGIN_MMF_NAME;
+SharedMemoryName ets2MmfName = ETS2_PLUGIN_MMF_NAME;
 
 /**
  * @brief Last timestamp we received.
@@ -498,6 +500,7 @@ SCSAPI_VOID scs_telemetry_shutdown(void)
 
 // Telemetry api.
 
+#ifdef _WIN32
 BOOL APIENTRY DllMain(
 	HMODULE module,
 	DWORD  reason_for_call,
@@ -515,3 +518,4 @@ BOOL APIENTRY DllMain(
 	}
 	return TRUE;
 }
+#endif

@@ -1,4 +1,13 @@
-#include "SharedMemory.hpp"
+#include "sharedmemory.hpp"
+
+#ifndef _WIN32
+#include <errno.h>
+#include <fcntl.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 
 void SharedMemory::LogError(const char *logPtr)
 {
@@ -10,20 +19,31 @@ void SharedMemory::LogError(const char *logPtr)
 	if (this->logFilePtr != NULL)
 	{
 		fprintf(this->logFilePtr, "%s\r\n", logPtr);
+#ifdef _WIN32
 		fprintf(this->logFilePtr, "Windows Error code: %d\r\n\r\n", GetLastError());
+#else
+		fprintf(this->logFilePtr, "POSIX Error code: %d (%s)\r\n\r\n", errno, strerror(errno));
+#endif
 	}
 #endif
 }
 
-SharedMemory::SharedMemory(LPCWSTR namePtr, unsigned int size)
+SharedMemory::SharedMemory(SharedMemoryName namePtr, unsigned int size)
 {
-    this->mapsize = size;
-    this->namePtr = namePtr;
+	this->mapsize = size;
+	this->namePtr = namePtr;
 	this->isSharedMemoryHooked = false;
+	this->pBufferPtr = NULL;
+#ifdef _WIN32
+	this->hMapFile = NULL;
+#else
+	this->hMapFile = -1;
+#endif
 #ifdef SHAREDMEM_LOGGING
 	this->logFilePtr = NULL;
 #endif
 
+#ifdef _WIN32
     hMapFile = CreateFileMapping(
             INVALID_HANDLE_VALUE, // use paging file
             NULL, // default security
@@ -67,6 +87,36 @@ SharedMemory::SharedMemory(LPCWSTR namePtr, unsigned int size)
 		this->isSharedMemoryHooked = true;
 		LogError("Opened MMF");
 	}
+#else
+    hMapFile = shm_open(namePtr, O_CREAT | O_RDWR, 0666);
+    if (hMapFile == -1)
+    {
+        LogError("Could not create shared memory object");
+        return;
+    }
+
+    if (ftruncate(hMapFile, size) == -1)
+    {
+        LogError("Could not size shared memory object");
+        close(hMapFile);
+        hMapFile = -1;
+        return;
+    }
+
+    this->pBufferPtr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, hMapFile, 0);
+    if (this->pBufferPtr == MAP_FAILED)
+    {
+        this->pBufferPtr = NULL;
+        LogError("Could not map shared memory object");
+        close(hMapFile);
+        hMapFile = -1;
+        return;
+    }
+
+    memset(this->pBufferPtr, 0, size);
+    this->isSharedMemoryHooked = true;
+    LogError("Opened POSIX shared memory");
+#endif
 		
 }
 
@@ -77,15 +127,24 @@ void SharedMemory::Close(void)
 		if (logFilePtr != NULL)
 		{
 			fclose(logFilePtr);
-			// TODO: Is this closed properly?
+			logFilePtr = NULL;
 		}
 #endif
         if (isSharedMemoryHooked)
         {
+#ifdef _WIN32
                 if (pBufferPtr != NULL) UnmapViewOfFile(pBufferPtr);
                 if (hMapFile != NULL) CloseHandle(hMapFile);
+                hMapFile = NULL;
+#else
+                if (pBufferPtr != NULL) munmap(pBufferPtr, mapsize);
+                if (hMapFile != -1) close(hMapFile);
+                if (namePtr != NULL) shm_unlink(namePtr);
+                hMapFile = -1;
+#endif
         }
 
+        pBufferPtr = NULL;
         isSharedMemoryHooked = false;
 
 }
