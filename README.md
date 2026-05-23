@@ -32,7 +32,7 @@ The Linux build produces `ets2-telemetry-server.so`. Copy it to the game's Linux
 The telemetry map is stored in a fixed-size shared-memory block.
 
 - **Windows name:** `Local\Ets2TelemetryServer`
-- **Linux name:** `/Ets2TelemetryServer`
+- **Linux name:** `/dev/shm/Ets2TelemetryServer`
 - **Size:** `ETS2_PLUGIN_MMF_SIZE` (`16 * 1024` bytes)
 
 Clients should read the `ets2TelemetryMap_t` layout from `ets2-telemetry/inc/ets2-telemetry-common.hpp`.
@@ -46,7 +46,7 @@ Notes:
 Example Linux client access:
 
 ```c
-int fd = shm_open("/Ets2TelemetryServer", O_RDONLY, 0);
+int fd = shm_open("/dev/shm/Ets2TelemetryServer", O_RDONLY, 0);
 ```
 
 ## Runtime flow
@@ -118,6 +118,10 @@ Job data is buffered so it can be restored when the trailer is reattached after 
 - The shared-memory schema is a binary contract; changing it breaks clients.
 
 # Version history
+
+## Revision 11 (23rd May 2026)
+- Added Linux support
+- Updated SDK to 1.14
 
 ### Revision 10 (19th June 2016)
 

@@ -10,7 +10,7 @@ add_library(ets2-telemetry-server SHARED
 
 target_include_directories(ets2-telemetry-server PRIVATE
     ets2-telemetry/inc
-    scs_sdk_1_5/include
+    scs_sdk_1_14/include
 )
 
 target_compile_features(ets2-telemetry-server PRIVATE cxx_std_98)
