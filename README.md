@@ -9,6 +9,7 @@ It exposes SCS telemetry data through a shared-memory map so external clients ca
 - **Game support:** Euro Truck Simulator 2 / American Truck Simulator
 - **Plugin name:** `ets2-telemetry-server`
 - **License:** MIT
+- **Build system:** CMake for both Linux and Windows (unified)
 
 ## Build
 
@@ -21,11 +22,19 @@ cmake --build build --config Release
 
 The Linux build produces `ets2-telemetry-server.so`. Copy it to the game's Linux plugin directory, for example `bin/linux_x64/plugins/`.
 
-### Windows
+### Windows (CMake)
 
-- Visual Studio solution: `ets2-telemetry/ets2-telemetry.sln`
-- Visual Studio project: `ets2-telemetry/ets2-telemetry.vcxproj`
-- Output: `ets2-telemetry-server.dll`
+Generate Visual Studio projects and/or ninja build files with CMake:
+
+```sh
+cmake -B build -S . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+# OR with Ninja generator:
+# cmake -B build -S . -G Ninja -DCMAKE_BUILD_TYPE=Release
+# cmake --build build --config Release
+```
+
+Output: `build/ets2-telemetry-server.dll`. Copy to the game's Windows plugin directory, for example `bin/win64/plugins/`.
 
 ## Shared memory
 
@@ -69,6 +78,7 @@ During frame updates it:
 ### Core vehicle state (`tel_rev1`)
 - trailer attachment
 - vehicle speed, acceleration, position, rotation
+- local angular velocity and angular acceleration
 - gear, gear count, engine RPM and max RPM
 - fuel, fuel capacity, fuel consumption
 - user input and effective input values
@@ -79,6 +89,10 @@ During frame updates it:
 - reverse gear count
 - trailer mass, ID, display name
 - income, delivery deadline, source/destination city and company
+
+### Additional metadata (`tel_rev3`)
+- trailer cargo damage
+- truck license plate
 
 ### Controls and warnings (`tel_rev3`)
 - retarder, shifter, wipers, parking brake, motor brake
@@ -95,6 +109,7 @@ During frame updates it:
 - local time scale and next rest stop
 - trailer placement and navigation fields
 - displayed gear
+- planned distance and cargo-loaded state
 
 ## Configuration handling
 
@@ -118,6 +133,10 @@ Job data is buffered so it can be restored when the trailer is reattached after 
 - The shared-memory schema is a binary contract; changing it breaks clients.
 
 # Version history
+
+## Revision 12 (29th May 2026)
+- Unified Windows build: migrated from Visual Studio project to CMake
+- Windows can now be built with: `cmake -G "Visual Studio 17 2022"` or Ninja
 
 ## Revision 11 (23rd May 2026)
 - Added Linux support

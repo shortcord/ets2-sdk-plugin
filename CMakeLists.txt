@@ -19,18 +19,10 @@ set_target_properties(ets2-telemetry-server PROPERTIES
     PREFIX ""
 )
 
+# Windows-specific configuration
 if(WIN32)
-    target_sources(ets2-telemetry-server PRIVATE ets2-telemetry/ets2-telemetry.def)
-    target_compile_definitions(ets2-telemetry-server PRIVATE WIN32 _WINDOWS _USRDLL TELEMETRY_EXPORTS)
-    target_compile_definitions(ets2-telemetry-server PRIVATE
-        $<$<CONFIG:Debug>:_DEBUG>
-        $<$<NOT:$<CONFIG:Debug>>:NDEBUG>
-        $<$<NOT:$<CONFIG:Debug>>:_CRT_SECURE_NO_WARNINGS>
-    )
+    set(BUILD_SHARED_LIBS OFF)
 else()
-    include(CheckLibraryExists)
-    check_library_exists(rt shm_open "" HAVE_SHM_OPEN_IN_RT)
-    if(HAVE_SHM_OPEN_IN_RT)
-        target_link_libraries(ets2-telemetry-server PRIVATE rt)
-    endif()
+    set(BUILD_SHARED_LIBS ON)
+endif()
 endif()

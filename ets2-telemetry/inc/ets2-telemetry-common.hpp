@@ -7,7 +7,7 @@
 // - Shared memory map struct layout
 // - [..]
 
-#define ETS2_PLUGIN_REVID					10
+#define ETS2_PLUGIN_REVID					11
 
 #define ETS2_PLUGIN_LOGGING_ON				_DEBUG
 #define ETS2_PLUGIN_LOGGING_SHAREDMEMORY	1
@@ -45,6 +45,8 @@ typedef struct
     char compSrc[GENERAL_STRING_SIZE];
     char compDst[GENERAL_STRING_SIZE];
     float wearTrailer;
+    unsigned int plannedDistance;
+    bool cargoLoaded;
 } job_buffer_struct;
 
 extern job_buffer_struct job_buffer;
@@ -75,6 +77,12 @@ typedef struct ets2TelemetryMap_s
 		float accelerationX;
 		float accelerationY;
 		float accelerationZ;
+		float localAngularVelocityX;
+		float localAngularVelocityY;
+		float localAngularVelocityZ;
+		float localAngularAccelerationX;
+		float localAngularAccelerationY;
+		float localAngularAccelerationZ;
 
 		float coordinateX;
 		float coordinateY;
@@ -198,6 +206,8 @@ typedef struct ets2TelemetryMap_s
 		char truckMake[GENERAL_STRING_SIZE];
 		char truckMakeId[GENERAL_STRING_SIZE];
 		char truckModel[GENERAL_STRING_SIZE];
+		char licensePlate[GENERAL_STRING_SIZE];
+		float trailerCargoDamage;
 	} tel_rev3;
 
 #define MAX_SHIFTER_TYPE_STRING_SIZE 16
@@ -241,6 +251,8 @@ typedef struct ets2TelemetryMap_s
 		float navigationDistance;
 		float navigationTime;
 		float navigationSpeedLimit;
+		unsigned int plannedDistance;
+		bool cargoLoaded;
 	} tel_rev4;
 
 } ets2TelemetryMap_t;

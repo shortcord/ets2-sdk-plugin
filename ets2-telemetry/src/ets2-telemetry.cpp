@@ -57,6 +57,73 @@ FILE *log_file = NULL;
 static bool onJob = false;
 job_buffer_struct job_buffer;
 
+static bool job_buffer_has_data(void)
+{
+	return job_buffer.jobIncome != 0 ||
+		job_buffer.time_abs_delivery != 0 ||
+		job_buffer.trailerMass != 0.0f ||
+		job_buffer.wearTrailer != 0.0f ||
+		job_buffer.plannedDistance != 0 ||
+		job_buffer.cargoLoaded ||
+		job_buffer.trailerId[0] != '\0' ||
+		job_buffer.trailerName[0] != '\0' ||
+		job_buffer.citySrc[0] != '\0' ||
+		job_buffer.cityDst[0] != '\0' ||
+		job_buffer.compSrc[0] != '\0' ||
+		job_buffer.compDst[0] != '\0';
+}
+
+static void clear_job_state(const bool preserve_cargo_damage)
+{
+	if (telemPtr != NULL)
+	{
+		telemPtr->tel_rev2.jobIncome = 0;
+		telemPtr->tel_rev2.time_abs_delivery = 0;
+		telemPtr->tel_rev2.trailerMass = 0;
+		telemPtr->tel_rev3.wearTrailer = 0;
+		telemPtr->tel_rev4.plannedDistance = 0;
+		telemPtr->tel_rev4.cargoLoaded = false;
+		if (!preserve_cargo_damage)
+		{
+			telemPtr->tel_rev3.trailerCargoDamage = 0;
+		}
+
+		memset(telemPtr->tel_rev2.trailerId, 0, GENERAL_STRING_SIZE);
+		memset(telemPtr->tel_rev2.trailerName, 0, GENERAL_STRING_SIZE);
+		memset(telemPtr->tel_rev2.citySrc, 0, GENERAL_STRING_SIZE);
+		memset(telemPtr->tel_rev2.cityDst, 0, GENERAL_STRING_SIZE);
+		memset(telemPtr->tel_rev2.compSrc, 0, GENERAL_STRING_SIZE);
+		memset(telemPtr->tel_rev2.compDst, 0, GENERAL_STRING_SIZE);
+	}
+
+	memset(&job_buffer, 0, sizeof(job_buffer));
+	onJob = false;
+}
+
+static void restore_job_state(void)
+{
+	if (telemPtr == NULL || !job_buffer_has_data())
+	{
+		return;
+	}
+
+	telemPtr->tel_rev2.jobIncome = job_buffer.jobIncome;
+	telemPtr->tel_rev2.time_abs_delivery = job_buffer.time_abs_delivery;
+	telemPtr->tel_rev2.trailerMass = job_buffer.trailerMass;
+	telemPtr->tel_rev3.wearTrailer = job_buffer.wearTrailer;
+	telemPtr->tel_rev4.plannedDistance = job_buffer.plannedDistance;
+	telemPtr->tel_rev4.cargoLoaded = job_buffer.cargoLoaded;
+
+	strncpy(telemPtr->tel_rev2.trailerId, job_buffer.trailerId, GENERAL_STRING_SIZE);
+	strncpy(telemPtr->tel_rev2.trailerName, job_buffer.trailerName, GENERAL_STRING_SIZE);
+	strncpy(telemPtr->tel_rev2.citySrc, job_buffer.citySrc, GENERAL_STRING_SIZE);
+	strncpy(telemPtr->tel_rev2.cityDst, job_buffer.cityDst, GENERAL_STRING_SIZE);
+	strncpy(telemPtr->tel_rev2.compSrc, job_buffer.compSrc, GENERAL_STRING_SIZE);
+	strncpy(telemPtr->tel_rev2.compDst, job_buffer.compDst, GENERAL_STRING_SIZE);
+
+	onJob = true;
+}
+
 SCSAPI_VOID telemetry_frame_start(const scs_event_t UNUSED(event), const void *const event_info, const scs_context_t UNUSED(context))
 {
 	const struct scs_telemetry_frame_start_t *const info = static_cast<const scs_telemetry_frame_start_t *>(event_info);
@@ -91,47 +158,21 @@ SCSAPI_VOID telemetry_frame_start(const scs_event_t UNUSED(event), const void *c
 		// Do a non-convential periodic update of this field:
 		telemPtr->tel_rev3.cruiseControl = (telemPtr->tel_rev3.cruiseControlSpeed > 0) ? true : false;
 
-        // Check if job is finished and clean job related information 
-        if (onJob && 
-            !telemPtr->tel_rev1.trailer_attached &&
-            telemPtr->tel_rev4.navigationDistance < 500.0f && telemPtr->tel_rev4.navigationDistance >= 0.0f)
-        {
-            // if trailer is detached and navigation distance is close to zero (< 500m) 
-            // then we assume the job has finished
+		// Check if job is finished and clean job related information
+		if (onJob &&
+			!telemPtr->tel_rev1.trailer_attached &&
+			telemPtr->tel_rev4.navigationDistance < 500.0f && telemPtr->tel_rev4.navigationDistance >= 0.0f)
+		{
+			// if trailer is detached and navigation distance is close to zero (< 500m)
+			// then we assume the job has finished
 
-            telemPtr->tel_rev2.jobIncome = 0;
-            telemPtr->tel_rev2.time_abs_delivery = 0;
-            telemPtr->tel_rev2.trailerMass = 0;
-            telemPtr->tel_rev3.wearTrailer = 0;
-            telemPtr->tel_rev4.navigationDistance = 0.0f;
-
-            memset(telemPtr->tel_rev2.trailerId, 0, GENERAL_STRING_SIZE);
-            memset(telemPtr->tel_rev2.trailerName, 0, GENERAL_STRING_SIZE);
-
-            memset(telemPtr->tel_rev2.citySrc, 0, GENERAL_STRING_SIZE);
-            memset(telemPtr->tel_rev2.cityDst, 0, GENERAL_STRING_SIZE);
-            memset(telemPtr->tel_rev2.compSrc, 0, GENERAL_STRING_SIZE);
-            memset(telemPtr->tel_rev2.compDst, 0, GENERAL_STRING_SIZE);
-
-            onJob = false;
-        }
-        else if (!onJob && telemPtr->tel_rev1.trailer_attached)
-        {         
-            telemPtr->tel_rev2.jobIncome = job_buffer.jobIncome;
-            telemPtr->tel_rev2.time_abs_delivery = job_buffer.time_abs_delivery;
-            telemPtr->tel_rev2.trailerMass = job_buffer.trailerMass;
-            telemPtr->tel_rev3.wearTrailer = job_buffer.wearTrailer;
-            
-            strncpy(telemPtr->tel_rev2.trailerId, job_buffer.trailerId, GENERAL_STRING_SIZE);
-            strncpy(telemPtr->tel_rev2.trailerName, job_buffer.trailerName, GENERAL_STRING_SIZE);
-
-            strncpy(telemPtr->tel_rev2.citySrc, job_buffer.citySrc, GENERAL_STRING_SIZE);
-            strncpy(telemPtr->tel_rev2.cityDst, job_buffer.cityDst, GENERAL_STRING_SIZE);
-            strncpy(telemPtr->tel_rev2.compSrc, job_buffer.compSrc, GENERAL_STRING_SIZE);
-            strncpy(telemPtr->tel_rev2.compDst, job_buffer.compDst, GENERAL_STRING_SIZE);
-
-            onJob = true;
-        }
+			telemPtr->tel_rev4.navigationDistance = 0.0f;
+			clear_job_state(false);
+		}
+		else if (!onJob && telemPtr->tel_rev1.trailer_attached && job_buffer_has_data())
+		{
+			restore_job_state();
+		}
 
 	}
 
@@ -145,17 +186,56 @@ SCSAPI_VOID telemetry_pause(const scs_event_t event, const void *const UNUSED(ev
 	}
 }
 
+SCSAPI_VOID telemetry_gameplay(const scs_event_t UNUSED(event), const void *const event_info, const scs_context_t UNUSED(context))
+{
+	const struct scs_telemetry_gameplay_event_t *const info = static_cast<const scs_telemetry_gameplay_event_t *>(event_info);
+
+	if (!info || !info->id)
+	{
+		return;
+	}
+
+	if (strcmp(info->id, SCS_TELEMETRY_GAMEPLAY_EVENT_job_delivered) == 0)
+	{
+		float cargo_damage = 0.0f;
+		bool cargo_damage_found = false;
+
+		for (const scs_named_value_t *current = info->attributes; current->name; ++current)
+		{
+			if (strcmp(current->name, SCS_TELEMETRY_GAMEPLAY_EVENT_ATTRIBUTE_cargo_damage) == 0 && current->value.type == SCS_VALUE_TYPE_float)
+			{
+				cargo_damage = current->value.value_float.value;
+				cargo_damage_found = true;
+				break;
+			}
+		}
+
+		clear_job_state(true);
+		if (telemPtr != NULL && cargo_damage_found)
+		{
+			telemPtr->tel_rev3.trailerCargoDamage = cargo_damage;
+		}
+		return;
+	}
+
+	if (strcmp(info->id, SCS_TELEMETRY_GAMEPLAY_EVENT_job_cancelled) == 0)
+	{
+		clear_job_state(false);
+	}
+}
+
 SCSAPI_VOID telemetry_configuration(const scs_event_t event, const void *const event_info, const scs_context_t UNUSED(context))
 {
 	// This method prints all available attributes of the truck.
 	// On configuration change, this function is called.
-    const struct scs_telemetry_configuration_t *const info = static_cast<const scs_telemetry_configuration_t *>(event_info);
+	const struct scs_telemetry_configuration_t *const info = static_cast<const scs_telemetry_configuration_t *>(event_info);
    
 #ifdef SDK_ENABLE_LOGGING
 	fprintf(log_file,"----\n");
 #endif
 
-    for (const scs_named_value_t *current = info->attributes; current->name; ++current)
+	current_config_id = info->id;
+	for (const scs_named_value_t *current = info->attributes; current->name; ++current)
 	{
 #ifdef SDK_ENABLE_LOGGING
 		fprintf(log_file, "Name: %s / Val: ", current->name);
@@ -200,6 +280,7 @@ SCSAPI_VOID telemetry_configuration(const scs_event_t event, const void *const e
 #endif
 		handleCfg(current);
 	}
+	current_config_id = NULL;
 }
 
 /******* STORING OF SEVERAL SCS DATA TYPES *******/
@@ -332,12 +413,13 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
 	const bool events_registered =
 		(version_params->register_for_event(SCS_TELEMETRY_EVENT_frame_start, telemetry_frame_start, NULL) == SCS_RESULT_ok) &&
 		(version_params->register_for_event(SCS_TELEMETRY_EVENT_paused, telemetry_pause, NULL) == SCS_RESULT_ok) &&
-		(version_params->register_for_event(SCS_TELEMETRY_EVENT_started, telemetry_pause, NULL) == SCS_RESULT_ok);
+		(version_params->register_for_event(SCS_TELEMETRY_EVENT_started, telemetry_pause, NULL) == SCS_RESULT_ok) &&
+		(version_params->register_for_event(SCS_TELEMETRY_EVENT_gameplay, telemetry_gameplay, NULL) == SCS_RESULT_ok);
 	
 	// Register configuration event, because it sends data like truck make, etc.
-	version_params->register_for_event(SCS_TELEMETRY_EVENT_configuration, telemetry_configuration, NULL);
+	const bool config_registered = (version_params->register_for_event(SCS_TELEMETRY_EVENT_configuration, telemetry_configuration, NULL) == SCS_RESULT_ok);
 
-	if (!events_registered)
+	if (!events_registered || !config_registered)
 	{
 		return SCS_RESULT_generic_error;
 	}
@@ -348,6 +430,8 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
 
 	registerChannel(TRUCK_CHANNEL_speed, float, telemPtr->tel_rev1.speed);
 	registerChannel(TRUCK_CHANNEL_local_linear_acceleration, fvector, telemPtr->tel_rev1.accelerationX);
+	registerChannel(TRUCK_CHANNEL_local_angular_velocity, fvector, telemPtr->tel_rev1.localAngularVelocityX);
+	registerChannel(TRUCK_CHANNEL_local_angular_acceleration, fvector, telemPtr->tel_rev1.localAngularAccelerationX);
 	registerChannel(TRUCK_CHANNEL_world_placement, dplacement, telemPtr->tel_rev1.coordinateX);
 
 	registerChannel(TRUCK_CHANNEL_engine_gear, s32, telemPtr->tel_rev1.gear);
@@ -415,6 +499,7 @@ SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const scs_telemetry_in
 	registerChannel(TRUCK_CHANNEL_wear_chassis, float, telemPtr->tel_rev3.wearChassis);
 	registerChannel(TRUCK_CHANNEL_wear_wheels, float, telemPtr->tel_rev3.wearWheels);
 	registerChannel(TRAILER_CHANNEL_wear_chassis, float, telemPtr->tel_rev3.wearTrailer);
+	registerChannel(TRAILER_CHANNEL_cargo_damage, float, telemPtr->tel_rev3.trailerCargoDamage);
 	registerChannel(TRUCK_CHANNEL_odometer, float, telemPtr->tel_rev3.truckOdometer);
 	registerChannel(TRUCK_CHANNEL_cruise_control, float, telemPtr->tel_rev3.cruiseControlSpeed);
 

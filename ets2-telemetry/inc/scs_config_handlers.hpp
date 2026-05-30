@@ -16,6 +16,8 @@ typedef struct scsConfigHandler_s
 
 // Define prototypes for all the various handlers
 
+extern const char* current_config_id;
+
 // Truck info etc.
 scsConfigHandle(Id);
 scsConfigHandle(CargoId);
@@ -23,6 +25,7 @@ scsConfigHandle(CargoId);
 scsConfigHandle(TruckMake);
 scsConfigHandle(TruckMakeId);
 scsConfigHandle(TruckModel);
+scsConfigHandle(LicensePlate);
 
 // Technical vehicle info
 scsConfigHandle(FuelCapacity);
@@ -45,6 +48,8 @@ scsConfigHandle(ShifterType);
 // Job info
 scsConfigHandle(JobIncome);
 scsConfigHandle(JobDeadline);
+scsConfigHandle(PlannedDistance);
+scsConfigHandle(CargoLoaded);
 scsConfigHandle(TrailerMass);
 scsConfigHandle(TrailerId);
 scsConfigHandle(TrailerName);

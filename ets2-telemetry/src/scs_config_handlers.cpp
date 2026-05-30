@@ -9,6 +9,8 @@
 extern SharedMemory *telemMem;
 extern ets2TelemetryMap_t *telemPtr;
 
+const char* current_config_id = NULL;
+
 const scsConfigHandler_t scsConfigTable[] = {
 	
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_brand_id, handleTruckMakeId },
@@ -16,6 +18,7 @@ const scsConfigHandler_t scsConfigTable[] = {
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_id, handleId },
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_cargo_accessory_id, handleCargoId },
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_name, handleTruckModel },
+	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_license_plate, handleLicensePlate },
 
 	// Truck technical info
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_fuel_capacity, handleFuelCapacity },
@@ -38,6 +41,8 @@ const scsConfigHandler_t scsConfigTable[] = {
 	// Job information
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_income, handleJobIncome },
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_delivery_time, handleJobDeadline },
+	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_planned_distance_km, handlePlannedDistance },
+	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_is_cargo_loaded, handleCargoLoaded },
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_cargo_mass, handleTrailerMass },
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_cargo_id, handleTrailerId },
 	{ SCS_TELEMETRY_CONFIG_ATTRIBUTE_cargo, handleTrailerName },
@@ -86,23 +91,31 @@ scsConfigHandle(Id)
 
 scsConfigHandle(TruckMake)
 {
-	if (telemPtr)
+	if (telemPtr && current_config_id && strcmp(current_config_id, SCS_TELEMETRY_CONFIG_truck) == 0)
 	{
 		strncpy(telemPtr->tel_rev3.truckMake, current->value.value_string.value, GENERAL_STRING_SIZE);
 	}
 }
 scsConfigHandle(TruckMakeId)
 {
-	if (telemPtr)
+	if (telemPtr && current_config_id && strcmp(current_config_id, SCS_TELEMETRY_CONFIG_truck) == 0)
 	{
 		strncpy(telemPtr->tel_rev3.truckMakeId, current->value.value_string.value, GENERAL_STRING_SIZE);
 	}
 }
 scsConfigHandle(TruckModel)
 {
-	if (telemPtr)
+	if (telemPtr && current_config_id && strcmp(current_config_id, SCS_TELEMETRY_CONFIG_truck) == 0)
 	{
 		strncpy(telemPtr->tel_rev3.truckModel, current->value.value_string.value, GENERAL_STRING_SIZE);
+	}
+}
+
+scsConfigHandle(LicensePlate)
+{
+	if (telemPtr && current_config_id && strcmp(current_config_id, SCS_TELEMETRY_CONFIG_truck) == 0)
+	{
+		strncpy(telemPtr->tel_rev3.licensePlate, current->value.value_string.value, GENERAL_STRING_SIZE);
 	}
 }
 
@@ -115,7 +128,7 @@ scsConfigHandle(CargoId)
 	// Cargo type overweighl_w.kvn can be found in def/cargo/
 	strPtr = static_cast<char*>(telemMem->getPtrAt(telemPtr->tel_rev1.trailerType[0]));
 	strcpy(strPtr, current->value.value_string.value);
-	telemPtr->tel_rev1.trailerType[1] = strlen(current->value.value_string.value);\
+	telemPtr->tel_rev1.trailerType[1] = strlen(current->value.value_string.value);
 }
 
 scsConfigHandle(FuelCapacity)
@@ -161,6 +174,24 @@ scsConfigHandle(JobDeadline)
 	{
 		telemPtr->tel_rev2.time_abs_delivery = current->value.value_u32.value;
         job_buffer.time_abs_delivery = current->value.value_u32.value;
+	}
+}
+
+scsConfigHandle(PlannedDistance)
+{
+	if (telemPtr)
+	{
+		telemPtr->tel_rev4.plannedDistance = current->value.value_u32.value;
+		job_buffer.plannedDistance = current->value.value_u32.value;
+	}
+}
+
+scsConfigHandle(CargoLoaded)
+{
+	if (telemPtr)
+	{
+		telemPtr->tel_rev4.cargoLoaded = current->value.value_bool.value != 0;
+		job_buffer.cargoLoaded = current->value.value_bool.value != 0;
 	}
 }
 
